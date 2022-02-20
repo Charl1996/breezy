@@ -199,7 +199,8 @@ class CSVStrategy(BaseStrategy, CSVHandler):
                         continue
                     cell_data.append(breeze_cell_data)
 
-                # Handle additional calculated data for specific cell
+                # Handle additional calculated data for specific cell specified by the
+                # 'lambda' function in the HEADER_VALUE_MAPPINGS config
                 if lambda_function:
                     cell_data.extend(eval(f"cls.{lambda_function}(old_dataframe, data_index)"))
 

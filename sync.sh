@@ -1,6 +1,9 @@
 #!/bin/bash
 
 if [ "$1" == "setup" ] ; then
+	echo "Installing virtualenv package..."
+	pip install virtualenv
+
 	echo "Creating virtual environment..."
 	virtualenv .	
 
@@ -10,6 +13,11 @@ if [ "$1" == "setup" ] ; then
 		
 		echo "Installing pip requirements..."
 		pip install -r requirements.txt
+
+		if [ "$?" -eq 0 ] ; then
+		  echo "Your environment is ready!"
+		fi
+
 	else
 		echo "There was a problem creating your virtual environment :("
 		exit 1
@@ -19,7 +27,7 @@ else
 	source bin/activate
 
 	# Run the script
-	python main.py "$@"
+	python ./code/main.py "$@"
 fi
 
 
