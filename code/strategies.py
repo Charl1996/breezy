@@ -370,6 +370,12 @@ class StrategyTwo(StrategyOne):
                     for fc in failed_syncs['deletes']:
                         print(f"Contact: {fc['contact']}, error: {fc['error']}")
 
+        stats = cls.remote_sync_result['stats']
+        print('')
+        print(f"{stats['creates']} creates failed")
+        print(f"{stats['updates']} updates failed")
+        print(f"{stats['deletes']} deletions failed")
+
     @classmethod
     def _export_failed_sync_contacts(cls, dataframe):
         # This setting only suppresses an irrelevant warning message

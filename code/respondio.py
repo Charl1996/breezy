@@ -11,6 +11,10 @@ from configs import (
 from utils import compare_contacts, output_dry_run_results
 
 
+def _get_stat(planned, failed):
+    return f'{len(failed)}/{len(planned)}'
+
+
 class RespondIORequests:
 
     @classmethod
@@ -92,11 +96,23 @@ class RespondIO(RespondIORequests):
                 failed_deletes = cls.delete_remote_contacts(deletes)
 
             return {
-                'status': cls.FAILED if any(failed_creates) or any(failed_updates) or any(failed_deletes) else cls.SUCCESS,
+                'status': cls.FAILED if any(failed_creates) or any(failed_updates) or any(
+                    failed_deletes) else cls.SUCCESS,
                 'failed': {
                     'creates': failed_creates,
                     'updates': failed_updates,
                     'deletes': failed_deletes,
+                },
+                'stats': {
+                    'creates': _get_stat(
+                        creates,
+                        failed_creates['contact_creates'] + failed_creates['contacts_ignored'],
+                    ),
+                    'updates': _get_stat(
+                        updates,
+                        failed_updates + failed_creates['tags_updates'],
+                    ),
+                    'deletes': _get_stat(deletes, failed_deletes),
                 },
             }
         except Exception as e:
