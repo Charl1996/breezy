@@ -1,4 +1,3 @@
-# from faker import Requests as requests
 import requests
 import json
 from configs import (

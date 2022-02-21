@@ -437,3 +437,25 @@ class StrategyTwo(StrategyOne):
         if len(new_dataframe.index) > 0:
             print('Exporting sync failures...')
             cls.export_to_csv(new_dataframe, output_path=FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME)
+
+
+class StrategyThree(StrategyTwo):
+    faulty_data = []
+
+    @classmethod
+    def execute(cls, samplefile, datafile, *args, **kwargs):
+        # Get data from Breeze and export to datafile
+        super().execute(samplefile, datafile)
+
+    @classmethod
+    def report_faulty_data(cls, faulty_data):
+        cls.faulty_data = faulty_data
+
+    @classmethod
+    def handle_cleaned_data(cls, dataframe):
+        super().handle_cleaned_data(dataframe)
+
+    @classmethod
+    def notify_results(cls, *args, **kwargs):
+        # Email faulty data + failed results
+        pass
