@@ -193,11 +193,20 @@ class CSVStrategy(BaseStrategy, CSVHandler):
                 cell_data = []
 
                 # Go through every specified Breeze header to be merged into this one cell
-                for h in breeze_headers:
-                    breeze_cell_data = old_dataframe[h][data_index]
-                    if not breeze_cell_data or str(breeze_cell_data) == 'nan':
-                        continue
-                    cell_data.append(breeze_cell_data)
+                for _header in breeze_headers:
+                    if _header.startswith('*'):
+                        postfix = _header[1:]
+
+                        for old_header in cls.get_header(old_dataframe):
+                            if old_header.endswith(postfix):
+                                if old_dataframe[old_header][data_index] == 'x':
+                                    tag = old_header[:old_header.find("(Tag)")].strip()
+                                    cell_data.append(tag)
+                    else:
+                        breeze_cell_data = old_dataframe[_header][data_index]
+                        if not breeze_cell_data or str(breeze_cell_data) == 'nan':
+                            continue
+                        cell_data.append(breeze_cell_data)
 
                 # Handle additional calculated data for specific cell specified by the
                 # 'lambda' function in the HEADER_VALUE_MAPPINGS config

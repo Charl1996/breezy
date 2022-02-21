@@ -2,7 +2,7 @@
 # Default auxiliary settings - can also be changed by the respective script arguments
 DEFAULT_STRATEGY = '1'
 DRY_RUN = 'no'
-DEFAULT_EXPORT_CSV = 'no'  # Not relevant to strategy 1
+DEFAULT_EXPORT_CSV = 'yes'  # Not relevant to strategy 1
 
 # Input paths
 DEFAULT_DATA_INPUT_FILE_PATH = 'data_files/input/breeze.csv'
@@ -41,7 +41,7 @@ FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME = 'failed_syncs.csv'
 """
 HEADER_VALUE_MAPPINGS = {
     'Phone Number': {'breeze_headers': ['Mobile']},
-    'Tags': {'lambda': 'dynamic_tags'},
+    'Tags': {'lambda': 'dynamic_tags', 'breeze_headers': ['*(Tag)']},
     'Email': {'breeze_headers': ['Email']},
     'Assignee': {},
     'custom_field.breeze_id': {'breeze_headers': ['Breeze ID']},
@@ -82,8 +82,7 @@ MALE = 'Male'
 # <Tag name>: '`<column-name>` <operator> `<value>`'
 DYNAMIC_TAGS_CRITERIA = {
     LEGENDES: "`Age` >= `65`",
-    MEMBER: "`Status` = `Member`",
-    VISITOR: "`Status` = `Visitor`",
+    MALE: "`Gender` = `Male`",
     FEMALE: "`Gender` = `Female`",
 }
 
