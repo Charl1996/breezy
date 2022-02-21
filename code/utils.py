@@ -10,7 +10,10 @@ def map_to_respondio_api_fields(breeze_contacts):
             if api_field['field_id'] == 'tags':
                 # Tags is a special case
                 tags_string = contact_data[breeze_header]
-                tags_list = tags_string.replace(' ', '').split(',') if tags_string else []
+                tags_list = tags_string.split(',') if tags_string else []
+                if any(tags_list):
+                    tags_list = [tag.strip() for tag in tags_list]
+
                 mapped_contact[api_field['field_id']] = tags_list
             else:
                 mapped_contact[api_field['field_id']] = str(contact_data[breeze_header]) if contact_data[breeze_header] else ''
