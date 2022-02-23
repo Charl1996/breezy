@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 
-from code.configs import (
+from configs import (
     HEADER_VALUE_MAPPINGS,
     DATA_OUTPUT_FILE_NAME,
     INPUT_COLUMNS_CLEANING_FUNCTIONS,
@@ -12,7 +12,7 @@ from code.configs import (
     EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE,
     FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME,
 )
-from code.respondio import RespondIO
+from respondio import RespondIO
 
 NUMERIC_OPERATORS = ['<', '<=', '>', '>=', '%']
 
@@ -31,6 +31,12 @@ class DataCleaner:
 
         # Return original for inspection
         return False, phone_number
+
+    @classmethod
+    def clean_tags(cls, tag):
+        tag = tag.replace('(', '- ')
+        tag = tag.replace(')', '')
+        return True, tag
 
 
 class BaseStrategy(DataCleaner):

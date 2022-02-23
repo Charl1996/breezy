@@ -1,4 +1,4 @@
-from code.configs import API_FIELD_MAPPINGS
+from configs import API_FIELD_MAPPINGS
 
 
 def map_to_respondio_api_fields(breeze_contacts):
@@ -98,7 +98,7 @@ def compare_contacts(breeze_contacts=[], respondio_contacts=[]):
             custom_fields = respond_contact['custom_fields']
 
             if 'breeze_id' in custom_fields.keys():
-                # Handle CMS contact
+                # Handle ChMS contact
                 if custom_fields['breeze_id'] == breeze_id:
                     # Contact match, so this contact should be removed from potential_contacts_to_delete list
                     matched_responseio_contact = respond_contact
@@ -124,7 +124,7 @@ def compare_contacts(breeze_contacts=[], respondio_contacts=[]):
 
 
 def _print_creates(data):
-    print('CREATES')
+    print(f'CREATES ({len(data)})')
     for contact in data:
         output_string = ""
         for field_name, field_value in contact.items():
@@ -137,7 +137,7 @@ def _print_creates(data):
 
 
 def _print_updates(data):
-    print('UPDATES')
+    print(f'UPDATES ({len(data)})')
     for contact in data:
         output_string = ""
         for field_name, field_value in contact.items():
@@ -150,7 +150,7 @@ def _print_updates(data):
 
 
 def _print_deletes(data):
-    print('DELETES')
+    print(f'DELETE ({len(data)})')
     output_string = ''
     for item in data:
         if not output_string:

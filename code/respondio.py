@@ -1,13 +1,13 @@
 import requests
 import json
-from code.configs import (
+from configs import (
     RESPONDIO_API_URL,
     RESPONDIO_API_TOKEN,
     FILTERED_EXPORT_ENABLED,
     GET_BY_REMOTE_FIELD_NAME,
     GET_BY_REMOTE_FIELD_VALUE,
 )
-from code.utils import compare_contacts, output_dry_run_results
+from utils import compare_contacts, output_dry_run_results
 
 
 def _get_stat(planned, failed):
@@ -62,6 +62,8 @@ class RespondIO(RespondIORequests):
     FAILED = 'failed'
     SUCCESS = 'success'
 
+    MAX_UPDATEABLE_TAGS = 10
+
     @classmethod
     def set_dry_run(cls, dry_run):
         cls.dry_run = dry_run
@@ -70,7 +72,16 @@ class RespondIO(RespondIORequests):
     def sync_to_respondio(cls, breeze_contacts: []):
         print('Syncing to RespondIO...')
         try:
-            respondio_contacts_data, _metadata = cls.get_contacts()
+            current_query_page = 1
+            respondio_contacts_data = []
+
+            while True:
+                print(f'Retrieving page data: {current_query_page}')
+                contacts_data, _metadata = cls.get_contacts(current_query_page)
+                if not any(contacts_data):
+                    break
+                respondio_contacts_data.extend(contacts_data)
+                current_query_page += 1
 
             creates, updates, deletes = compare_contacts(
                 breeze_contacts=breeze_contacts,
@@ -119,8 +130,8 @@ class RespondIO(RespondIORequests):
             raise e
 
     @classmethod
-    def get_contacts(cls):
-        resource = f'contact/by_custom_field?name={GET_BY_REMOTE_FIELD_NAME}&value={GET_BY_REMOTE_FIELD_VALUE}'
+    def get_contacts(cls, page):
+        resource = f'contact/by_custom_field?name={GET_BY_REMOTE_FIELD_NAME}&value={GET_BY_REMOTE_FIELD_VALUE}&page={page}'
         response = cls.get(resource)
 
         if response.status_code == 200:
@@ -135,6 +146,7 @@ class RespondIO(RespondIORequests):
         failed_tag_updates = []
         ignored_creates = []
 
+        print('Creating contacts...')
         for contact_to_create in creates:
             if not contact_to_create['phone']:
                 ignored_creates.append(
@@ -158,9 +170,9 @@ class RespondIO(RespondIORequests):
             new_contact_id = new_contact_data.get('id')
 
             if new_contact_id and tags:
-                response = cls.post(f'contact/{new_contact_id}/tags', {'tags': tags})
+                success, response = cls._update_tags('add', new_contact_id, tags)
 
-                if response.status_code != 200:
+                if not success:
                     failed_tag_updates.append(cls._failed_response(contact_to_create, response))
                     continue
 
@@ -184,7 +196,7 @@ class RespondIO(RespondIORequests):
             }
         """
         failed_updates = []
-
+        print('Updating contacts...')
         for contact_to_update in updates:
             contact_id = contact_to_update['id']
 
@@ -207,23 +219,15 @@ class RespondIO(RespondIORequests):
                     tags_to_add.extend(tag.get('add', []))
                     tags_to_remove.extend(tag.get('remove', []))
 
-                if tags_to_add:
-                    tags_payload = {
-                        'tags': tags_to_add
-                    }
-                    response = cls.post(f"contact/{contact_id}/tags", tags_payload)
-                    if response.status_code != 200:
-                        failed_updates.append(cls._failed_response(contact_to_update, response))
-                        continue
+                success, response = cls._update_tags('add', contact_id, tags_to_add)
+                if not success:
+                    failed_updates.append(cls._failed_response(contact_to_update, response))
+                    continue
 
-                if tags_to_remove:
-                    tags_payload = {
-                        'tags': tags_to_remove
-                    }
-                    response = cls.delete(f"contact/{contact_id}/tags", tags_payload)
-                    if response.status_code != 200:
-                        failed_updates.append(cls._failed_response(contact_to_update, response))
-                        continue
+                success, response = cls._update_tags('remove', contact_id, tags_to_remove)
+                if not success:
+                    failed_updates.append(cls._failed_response(contact_to_update, response))
+                    continue
 
         return failed_updates
 
@@ -231,6 +235,7 @@ class RespondIO(RespondIORequests):
     def delete_remote_contacts(cls, contacts_to_delete):
         # Update each contact's custom_field.active to false
         delete_updates = []
+        print('Deleting contacts...')
         for delete_contact in contacts_to_delete:
             delete_updates.append({
                 'id': delete_contact['id'],
@@ -294,3 +299,29 @@ class RespondIO(RespondIORequests):
                     'reason': 'Something went wrong'
                 }
             }
+
+    @classmethod
+    def _update_tags(cls, method, contact_id, tags):
+        if not tags:
+            return True, None
+
+        url = f"contact/{contact_id}/tags"
+        tags_to_update = [tags]
+
+        if len(tags) > cls.MAX_UPDATEABLE_TAGS:
+            # Divide list of tags into groups of size MAX_UPDATEABLE_TAGS
+            tags_to_update = [
+                tags[i:i + cls.MAX_UPDATEABLE_TAGS]
+                for i in range(0, len(tags), cls.MAX_UPDATEABLE_TAGS)
+            ]
+
+        for tags_partition in tags_to_update:
+            if method == 'add':
+                response = cls.post(url, {'tags': tags_partition})
+            else:
+                response = cls.delete(url, {'tags': tags_partition})
+
+            if response.status_code != 200:
+                return False, response
+
+        return True, None

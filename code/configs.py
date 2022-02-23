@@ -41,7 +41,7 @@ FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME = 'failed_syncs.csv'
 """
 HEADER_VALUE_MAPPINGS = {
     'Phone Number': {'breeze_headers': ['Mobile']},
-    'Tags': {'lambda': 'dynamic_tags', 'breeze_headers': ['*(Tag)']},
+    'Tags': {'lambda': 'dynamic_tags', 'breeze_headers': ['*(Tag)', 'Campus']},
     'Email': {'breeze_headers': ['Email']},
     'Assignee': {},
     'custom_field.breeze_id': {'breeze_headers': ['Breeze ID']},
@@ -66,7 +66,9 @@ INPUT_COLUMNS_CLEANING_FUNCTIONS = {
     'Mobile': 'clean_phone_number',
 }
 
-OUTPUT_COLUMNS_CLEANING_FUNCTIONS = {}
+OUTPUT_COLUMNS_CLEANING_FUNCTIONS = {
+    'Tags': 'clean_tags'
+}
 
 
 # DYNAMIC TAGS MANAGEMENT
@@ -76,7 +78,7 @@ MEMBER = 'Member'
 VISITOR = 'Visitor'
 FEMALE = 'Female'
 MALE = 'Male'
-
+TEMP_AGE_TAG = 'TempAgeTag'
 
 # The values of this config MUST be formatted as follows
 # <Tag name>: '`<column-name>` <operator> `<value>`'
@@ -84,14 +86,15 @@ DYNAMIC_TAGS_CRITERIA = {
     LEGENDES: "`Age` >= `65`",
     MALE: "`Gender` = `Male`",
     FEMALE: "`Gender` = `Female`",
+    TEMP_AGE_TAG: "`Age` >= `16`"
 }
 
 # ---- FILTERED EXPORTING ----
 # Filtering is tested very limited
 
 # For no tags filtering, keep list empty
-FILTERED_EXPORT_ENABLED = False
-ONLY_EXPORT_CONTACTS_WITH_TAGS = []
+FILTERED_EXPORT_ENABLED = True
+ONLY_EXPORT_CONTACTS_WITH_TAGS = [TEMP_AGE_TAG]
 
 # When adding another column, a logical OR operator is applied
 EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE = {
