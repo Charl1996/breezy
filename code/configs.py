@@ -74,8 +74,6 @@ OUTPUT_COLUMNS_CLEANING_FUNCTIONS = {
 # DYNAMIC TAGS MANAGEMENT
 # Below are tags that should be assigned dynamically
 LEGENDES = 'Legendes'
-MEMBER = 'Member'
-VISITOR = 'Visitor'
 FEMALE = 'Female'
 MALE = 'Male'
 
