@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 
-from configs import (
+from code.configs import (
     HEADER_VALUE_MAPPINGS,
     DATA_OUTPUT_FILE_NAME,
     INPUT_COLUMNS_CLEANING_FUNCTIONS,
@@ -12,7 +12,7 @@ from configs import (
     EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE,
     FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME,
 )
-from respondio import RespondIO
+from code.respondio import RespondIO
 
 NUMERIC_OPERATORS = ['<', '<=', '>', '>=', '%']
 
