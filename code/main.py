@@ -1,5 +1,5 @@
 import argparse
-from configs import (
+from code.configs import (
     DEFAULT_STRATEGY,
     DEFAULT_DATA_INPUT_FILE_PATH,
     DEFAULT_SAMPLE_INPUT_FILE_PATH,
@@ -11,6 +11,7 @@ from configs import (
 STRATEGIES = {
     '1': 'StrategyOne',
     '2': 'StrategyTwo',
+    '3': 'StrategyThree',
 }
 
 

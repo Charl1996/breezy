@@ -1,4 +1,4 @@
-from configs import API_FIELD_MAPPINGS
+from code.configs import API_FIELD_MAPPINGS
 
 
 def map_to_respondio_api_fields(breeze_contacts):

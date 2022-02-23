@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 
-from configs import (
+from code.configs import (
     HEADER_VALUE_MAPPINGS,
     DATA_OUTPUT_FILE_NAME,
     INPUT_COLUMNS_CLEANING_FUNCTIONS,
@@ -11,8 +11,11 @@ from configs import (
     FILTERED_EXPORT_ENABLED,
     EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE,
     FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME,
+    DEFAULT_EMAIL,
 )
-from respondio import RespondIO
+from code.respondio import RespondIO
+from code.breeze import Breeze
+
 
 NUMERIC_OPERATORS = ['<', '<=', '>', '>=', '%']
 
@@ -127,9 +130,12 @@ class CSVHandler:
 class CSVStrategy(BaseStrategy, CSVHandler):
 
     @classmethod
+    def get_sample_file_headers(cls, path):
+        return cls.get_header(cls.get_csv_dataframe(path))
+
+    @classmethod
     def get_data(cls, samplefile, datafile):
-        sample_data = cls.get_csv_dataframe(samplefile)
-        respondio_headers = cls.get_header(sample_data)
+        respondio_headers = cls.get_sample_file_headers(samplefile)
         people_data = cls.get_csv_dataframe(datafile)
         return respondio_headers, people_data
 
@@ -439,23 +445,44 @@ class StrategyTwo(StrategyOne):
             cls.export_to_csv(new_dataframe, output_path=FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME)
 
 
-class StrategyThree(StrategyTwo):
-    faulty_data = []
-
-    @classmethod
-    def execute(cls, samplefile, datafile, *args, **kwargs):
-        # Get data from Breeze and export to datafile
-        super().execute(samplefile, datafile)
-
-    @classmethod
-    def report_faulty_data(cls, faulty_data):
-        cls.faulty_data = faulty_data
-
-    @classmethod
-    def handle_cleaned_data(cls, dataframe):
-        super().handle_cleaned_data(dataframe)
-
-    @classmethod
-    def notify_results(cls, *args, **kwargs):
-        # Email faulty data + failed results
-        pass
+# class StrategyThree(StrategyTwo):
+#     faulty_data = []
+#
+#     @classmethod
+#     def execute(cls, samplefile, datafile, *args, **kwargs):
+#         breakpoint()
+#         success, contacts = Breeze.get_contacts()
+#         if success:
+#             headers = cls.get_sample_file_headers(samplefile)
+#             dataframe = cls.parse_to_dataframe(headers, contacts)
+#             cls.export_to_csv(dataframe, datafile)
+#
+#             super().execute(samplefile, datafile)
+#         else:
+#             cls.send_email(
+#                 DEFAULT_EMAIL,
+#                 'Failed sync',
+#                 'Could not retrieve Breeze contacts'
+#             )
+#             return None
+#
+#     @classmethod
+#     def report_faulty_data(cls, faulty_data):
+#         cls.faulty_data = faulty_data
+#
+#     @classmethod
+#     def handle_cleaned_data(cls, dataframe):
+#         super().handle_cleaned_data(dataframe)
+#
+#     @classmethod
+#     def notify_results(cls, *args, **kwargs):
+#         # Email faulty data + failed results
+#         pass
+#
+#     @classmethod
+#     def parse_to_dataframe(cls, columns, raw_breeze_contacts):
+#         return None
+#
+#     @classmethod
+#     def send_email(cls, recipient, subject, message):
+#         pass

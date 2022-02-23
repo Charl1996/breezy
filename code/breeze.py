@@ -1,5 +1,6 @@
 import requests
-from configs import (
+import json
+from code.configs import (
     BREEZE_API_URL,
     BREEZE_API_KEY,
 )
@@ -23,5 +24,15 @@ class BreezeRequests:
         return requests.get(url, headers=cls.headers())
 
 
-class Beeze:
-    pass
+class Breeze(BreezeRequests):
+
+    @classmethod
+    def get_contacts(cls, limit=None):
+        url = 'people?details=1&limit=10'
+        if limit is not None:
+            url = f'{url}&limit={limit}'
+        response = cls.get(url)
+
+        if response.status_code != 200:
+            return False, json.loads(response.content)
+        return True, json.loads(response.content)
