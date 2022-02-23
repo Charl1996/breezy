@@ -78,7 +78,6 @@ MEMBER = 'Member'
 VISITOR = 'Visitor'
 FEMALE = 'Female'
 MALE = 'Male'
-TEMP_AGE_TAG = 'TempAgeTag'
 
 # The values of this config MUST be formatted as follows
 # <Tag name>: '`<column-name>` <operator> `<value>`'
@@ -86,15 +85,14 @@ DYNAMIC_TAGS_CRITERIA = {
     LEGENDES: "`Age` >= `65`",
     MALE: "`Gender` = `Male`",
     FEMALE: "`Gender` = `Female`",
-    TEMP_AGE_TAG: "`Age` >= `16`"
 }
 
 # ---- FILTERED EXPORTING ----
 # Filtering is tested very limited
 
 # For no tags filtering, keep list empty
-FILTERED_EXPORT_ENABLED = True
-ONLY_EXPORT_CONTACTS_WITH_TAGS = [TEMP_AGE_TAG]
+FILTERED_EXPORT_ENABLED = False
+ONLY_EXPORT_CONTACTS_WITH_TAGS = []
 
 # When adding another column, a logical OR operator is applied
 EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE = {
