@@ -139,3 +139,16 @@ RESPONDIO_API_TOKEN = 'f5b39f52ba96fdacf47f0b1fe145cf68c5ffcaf8fe5108cbab7c0e18b
 
 BREEZE_API_URL = 'https://gesinskerk.breezechms.com/api/'
 BREEZE_API_KEY = 'dd6bdc926910babb9e745163ee11b4d0'
+
+DEFAULT_EMAIL = 'charlsmit96@gmail.com'
+
+BREEZE_TO_CSV_HEADER_CONVERTERS = {
+    'id': 'Breeze ID',
+    'first_name': 'First Name',
+    'last_name': 'Last Name',
+    'gender': 'Gender',
+    'age': 'Age',
+    'campus': 'Campus',
+    'mobile': 'Mobile',
+    'email': 'Email',
+}
