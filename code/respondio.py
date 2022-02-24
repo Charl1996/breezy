@@ -1,13 +1,13 @@
 import requests
 import json
-from code.configs import (
+from configs import (
     RESPONDIO_API_URL,
     RESPONDIO_API_TOKEN,
     FILTERED_EXPORT_ENABLED,
     GET_BY_REMOTE_FIELD_NAME,
     GET_BY_REMOTE_FIELD_VALUE,
 )
-from code.utils import compare_contacts, output_dry_run_results
+from utils import compare_contacts, output_dry_run_results
 
 
 def _get_stat(planned, failed):

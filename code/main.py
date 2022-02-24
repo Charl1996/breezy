@@ -1,5 +1,5 @@
 import argparse
-from code.configs import (
+from configs import (
     DEFAULT_STRATEGY,
     DEFAULT_DATA_INPUT_FILE_PATH,
     DEFAULT_SAMPLE_INPUT_FILE_PATH,

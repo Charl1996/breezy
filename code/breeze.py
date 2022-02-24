@@ -1,6 +1,8 @@
 import requests
 import json
-from code.configs import (
+
+from datetime import datetime
+from configs import (
     BREEZE_API_URL,
     BREEZE_API_KEY,
 )
@@ -27,12 +29,85 @@ class BreezeRequests:
 class Breeze(BreezeRequests):
 
     @classmethod
-    def get_contacts(cls, limit=None):
-        url = 'people?details=1&limit=10'
-        if limit is not None:
-            url = f'{url}&limit={limit}'
-        response = cls.get(url)
+    def get_contacts(cls):
+        try:
+            tags = cls._get_tags()
+            people_list = cls._get_people(detail=True)
 
-        if response.status_code != 200:
-            return False, json.loads(response.content)
-        return True, json.loads(response.content)
+            people_list_with_tags = []
+            for person in people_list:
+                p = cls._parse_person_fields(person)
+                people_list_with_tags.append(p)
+
+            tags_names = []
+            for tag in tags:
+                people = cls._get_users_by_tag_id(tag['id'])
+                people_list_with_tags = cls._update_people_in_list_with_tag(people, people_list_with_tags, tag['name'])
+                tags_names.append(tag['name'])
+
+        except Exception as e:
+            print(e)
+            return False, None, None
+
+        return True, people_list_with_tags, tags_names
+
+    @classmethod
+    def _update_people_in_list_with_tag(cls, tags_people, people_list, tag_name):
+        for tag_person in tags_people:
+            for index, p in enumerate(people_list):
+                if p.get('id', '') == tag_person['id']:
+                    current_tags = p.get('tags') or []
+                    p['tags'] = current_tags + [tag_name]
+                    people_list[index] = p
+
+        return people_list
+
+    @classmethod
+    def _parse_person_fields(cls, person):
+        def _age(birth):
+            if not birth:
+                return ''
+            return datetime.utcnow().year - int(birth[:4])
+
+        parsed_person = dict()
+
+        parsed_person['id'] = person['id']
+        parsed_person['first_name'] = person['first_name']
+        parsed_person['last_name'] = person['last_name']
+        parsed_person['gender'] = person['details'].get('757881885', {}).get('name')
+        parsed_person['age'] = _age(person['details'].get('birthdate'))
+        parsed_person['campus'] = person['details'].get('1847408178', {}).get('name')
+        parsed_person['mobile'] = person['details'].get('79910291', [{}])[0].get('phone_number')
+        parsed_person['email'] = person['details'].get('1676694648', [{}])[0].get('address')
+        parsed_person['tags'] = []
+
+        return parsed_person
+
+    @classmethod
+    def _get_tags(cls):
+        result = cls.get('tags/list_tags')
+        if result.status_code != 200:
+            return None
+
+        return json.loads(result.content)
+
+    @classmethod
+    def _get_people(cls, detail=False):
+        detail_flag = 0
+        if detail:
+            detail_flag = 1
+
+        result = cls.get(f'people/?details={detail_flag}')
+        if result.status_code != 200:
+            raise Exception('Retrieving tags unsuccessful!')
+
+        return json.loads(result.content)
+
+    @classmethod
+    def _get_users_by_tag_id(cls, tag_id):
+        filter_json = json.dumps({'tag_contains': f'y_{tag_id}'})
+        result = cls.get(f'people/?filter_json={filter_json}')
+        if result.status_code != 200:
+            raise Exception('Retrieving tags unsuccessful!')
+
+        return json.loads(result.content)

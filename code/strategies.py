@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 
-from code.configs import (
+from configs import (
     HEADER_VALUE_MAPPINGS,
     DATA_OUTPUT_FILE_NAME,
     INPUT_COLUMNS_CLEANING_FUNCTIONS,
@@ -11,10 +11,11 @@ from code.configs import (
     FILTERED_EXPORT_ENABLED,
     EXPORT_CONTACTS_WHERE_COLUMNS_HAS_VALUE,
     FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME,
-    DEFAULT_EMAIL,
+    BREEZE_TO_CSV_HEADER_CONVERTERS,
 )
-from code.respondio import RespondIO
-from code.breeze import Breeze
+from respondio import RespondIO
+from breeze import Breeze
+from utils import send_email
 
 
 NUMERIC_OPERATORS = ['<', '<=', '>', '>=', '%']
@@ -95,27 +96,30 @@ class CSVHandler:
     export_dir = None
 
     @classmethod
-    def export_to_csv(cls, dataframe, output_path=None):
-        if not cls.export_dir:
-            import datetime
+    def export_to_csv(cls, dataframe, output_path=None, generated_input_file=False):
+        if generated_input_file:
+            export_path = output_path
+        else:
+            if not cls.export_dir:
+                import datetime
 
-            timestamp = datetime.datetime.now()
-            export_timestamp = '{year}_{month}_{day}_{hour}:{minute}:{second}'.format(
-                year=timestamp.year,
-                month=timestamp.month,
-                day=timestamp.day,
-                hour=timestamp.hour,
-                minute=timestamp.minute,
-                second=timestamp.second,
-            )
-            cls.export_dir = f'sync_{export_timestamp}'
-            os.mkdir(f'data_files/output/{cls.export_dir}')
+                timestamp = datetime.datetime.now()
+                export_timestamp = '{year}_{month}_{day}_{hour}:{minute}:{second}'.format(
+                    year=timestamp.year,
+                    month=timestamp.month,
+                    day=timestamp.day,
+                    hour=timestamp.hour,
+                    minute=timestamp.minute,
+                    second=timestamp.second,
+                )
+                cls.export_dir = f'sync_{export_timestamp}'
+                os.mkdir(f'data_files/output/{cls.export_dir}')
 
-        path = DATA_OUTPUT_FILE_NAME
-        if output_path:
-            path = output_path
+            path = DATA_OUTPUT_FILE_NAME
+            if output_path:
+                path = output_path
 
-        export_path = f'data_files/output/{cls.export_dir}/{path}'
+            export_path = f'data_files/output/{cls.export_dir}/{path}'
         dataframe.to_csv(export_path, index=False)
 
     @classmethod
@@ -445,44 +449,56 @@ class StrategyTwo(StrategyOne):
             cls.export_to_csv(new_dataframe, output_path=FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME)
 
 
-# class StrategyThree(StrategyTwo):
-#     faulty_data = []
-#
-#     @classmethod
-#     def execute(cls, samplefile, datafile, *args, **kwargs):
-#         breakpoint()
-#         success, contacts = Breeze.get_contacts()
-#         if success:
-#             headers = cls.get_sample_file_headers(samplefile)
-#             dataframe = cls.parse_to_dataframe(headers, contacts)
-#             cls.export_to_csv(dataframe, datafile)
-#
-#             super().execute(samplefile, datafile)
-#         else:
-#             cls.send_email(
-#                 DEFAULT_EMAIL,
-#                 'Failed sync',
-#                 'Could not retrieve Breeze contacts'
-#             )
-#             return None
-#
-#     @classmethod
-#     def report_faulty_data(cls, faulty_data):
-#         cls.faulty_data = faulty_data
-#
-#     @classmethod
-#     def handle_cleaned_data(cls, dataframe):
-#         super().handle_cleaned_data(dataframe)
-#
-#     @classmethod
-#     def notify_results(cls, *args, **kwargs):
-#         # Email faulty data + failed results
-#         pass
-#
-#     @classmethod
-#     def parse_to_dataframe(cls, columns, raw_breeze_contacts):
-#         return None
-#
-#     @classmethod
-#     def send_email(cls, recipient, subject, message):
-#         pass
+class StrategyThree(StrategyTwo):
+    faulty_data = None
+
+    @classmethod
+    def execute(cls, samplefile, datafile, *args, **kwargs):
+        success, contacts, tags = Breeze.get_contacts()
+
+        if success:
+            dataframe = cls.parse_to_dataframe(contacts, tags)
+            cls.export_to_csv(dataframe, datafile, generated_input_file=True)
+
+            faulty_data = super().execute(samplefile, datafile, *args, **kwargs)
+        else:
+            cls.send_email(
+                'Failed sync',
+                'Could not retrieve Breeze contacts'
+            )
+            return None
+
+    @classmethod
+    def report_faulty_data(cls, faulty_data):
+        cls.faulty_data = faulty_data
+
+    @classmethod
+    def handle_cleaned_data(cls, dataframe):
+        super().handle_cleaned_data(dataframe)
+
+    @classmethod
+    def notify_results(cls, *args, **kwargs):
+        # Email faulty data + failed results
+        pass
+
+    @classmethod
+    def parse_to_dataframe(cls, raw_breeze_contacts, tags):
+        dataframe_dict = dict()
+        # Initialise empty header columns
+        for _x, csv_header in BREEZE_TO_CSV_HEADER_CONVERTERS.items():
+            dataframe_dict[csv_header] = []
+
+        for tag in tags:
+            qualified_header = f'{tag} (Tag)'
+            dataframe_dict[qualified_header] = [None for i in range(len(raw_breeze_contacts))]
+
+        for index, contact in enumerate(raw_breeze_contacts):
+            for breeze_header, csv_header in BREEZE_TO_CSV_HEADER_CONVERTERS.items():
+                dataframe_dict[csv_header].append(contact[breeze_header])
+
+            if contact.get('tags') is not None:
+                for tag in contact['tags']:
+                    qualified_header = f'{tag} (Tag)'
+                    dataframe_dict[qualified_header][index] = 'x'
+
+        return pd.DataFrame(data=dataframe_dict)
