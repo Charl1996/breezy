@@ -1,6 +1,9 @@
 from secrets import *
 
-EMAIL_RECIPIENTS = ['charlsmit96@gmail.com']
+EMAIL_RECIPIENTS = [
+    'charlsmit96@gmail.com',
+    # 'riaan@gesinskerk.co.za'
+]
 DEFAULT_FROM_EMAIL = 'charlsmit96@gmail.com'
 
 # Default auxiliary settings - can also be changed by the respective script arguments

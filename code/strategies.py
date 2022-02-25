@@ -493,12 +493,18 @@ class StrategyThree(StrategyTwo):
 
     @classmethod
     def notify_results(cls, *args, **kwargs):
+        log('Notifying results')
         today_date = datetime.strftime(datetime.today(), "%d-%m-%Y %H:%M:%S")
-        attachment = None
+        attachment_info = None
 
         if cls.remote_sync_result.get('status') == RespondIO.FAILED:
             subject = f'Some items failed to sync - {today_date}'
             attachment_file_path = cls._get_failed_results_attachment_path()
+
+            attachment_info = {
+                'path': attachment_file_path,
+                'name': 'failed_syncs.csv'
+            }
 
             stats = cls.remote_sync_result['stats']
 
@@ -515,10 +521,6 @@ class StrategyThree(StrategyTwo):
             Your data has been successfully synced! 
             """
 
-        attachment_info = {
-            'path': attachment_file_path,
-            'name': 'failed_syncs.csv'
-        }
         send_email(subject, email_body, attachment_info=attachment_info)
 
     @classmethod
