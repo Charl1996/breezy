@@ -1,3 +1,4 @@
-
+data_files/
+!data_files/input/sample.csv
 lib/
 code/secrets.py
