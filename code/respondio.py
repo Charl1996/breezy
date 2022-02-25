@@ -8,6 +8,7 @@ from configs import (
     GET_BY_REMOTE_FIELD_VALUE,
 )
 from utils import compare_contacts, output_dry_run_results
+from logger import log
 
 
 def _get_stat(planned, failed):
@@ -63,6 +64,7 @@ class RespondIO(RespondIORequests):
     SUCCESS = 'success'
 
     MAX_UPDATEABLE_TAGS = 10
+    LOGGER_ID = 'RespondIO'
 
     @classmethod
     def set_dry_run(cls, dry_run):
@@ -70,19 +72,20 @@ class RespondIO(RespondIORequests):
 
     @classmethod
     def sync_to_respondio(cls, breeze_contacts: []):
-        print('Syncing to RespondIO...')
         try:
             current_query_page = 1
             respondio_contacts_data = []
 
+            log(f'{cls.LOGGER_ID} sync_to_respondio: retrieving contacts')
             while True:
-                print(f'Retrieving page data: {current_query_page}')
+                log(f'{cls.LOGGER_ID} sync_to_respondio: retrieving page data: {current_query_page}')
                 contacts_data, _metadata = cls.get_contacts(current_query_page)
                 if not any(contacts_data):
                     break
                 respondio_contacts_data.extend(contacts_data)
                 current_query_page += 1
 
+            log(f'{cls.LOGGER_ID} sync_to_respondio: comparing contacts')
             creates, updates, deletes = compare_contacts(
                 breeze_contacts=breeze_contacts,
                 respondio_contacts=respondio_contacts_data
@@ -92,9 +95,11 @@ class RespondIO(RespondIORequests):
                 output_dry_run_results(creates=creates, updates=updates, deletes=deletes)
 
             # Handle remote creates
+            log(f'{cls.LOGGER_ID} sync_to_respondio: handling "create" contacts')
             failed_creates = cls.create_remote_contacts(creates)
 
             # Handle remote updates
+            log(f'{cls.LOGGER_ID} sync_to_respondio: handling "update" contacts')
             failed_updates = cls.update_remote_contacts(updates)
 
             # Handle remote deletes
@@ -103,6 +108,7 @@ class RespondIO(RespondIORequests):
                 # A remote delete is not permitted if a filtered export is being done,
                 # because there's no way of knowing who should not exist on repond.io
                 # with an incomplete list
+                log(f'{cls.LOGGER_ID} sync_to_respondio: handling "delete" contacts')
                 failed_deletes = cls.delete_remote_contacts(deletes)
 
             return {

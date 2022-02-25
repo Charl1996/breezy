@@ -170,7 +170,7 @@ def output_dry_run_results(creates=[], updates=[], deletes=[]):
     exit(0)
 
 
-def send_email(subject, body, recipient=None):
+def send_email(subject, body, recipient=None, attachment=None):
     if not recipient:
         recipient = DEFAULT_EMAIL
     if not subject or body:

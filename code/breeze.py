@@ -6,6 +6,7 @@ from configs import (
     BREEZE_API_URL,
     BREEZE_API_KEY,
 )
+from logger import log
 
 
 class BreezeRequests:
@@ -28,10 +29,15 @@ class BreezeRequests:
 
 class Breeze(BreezeRequests):
 
+    LOGGER_ID = 'Breeze'
+
     @classmethod
     def get_contacts(cls):
         try:
+            log(f'{cls.LOGGER_ID} get_contacts: retrieving tags')
             tags = cls._get_tags()
+
+            log(f'{cls.LOGGER_ID} get_contacts: retrieving people')
             people_list = cls._get_people(detail=True)
 
             people_list_with_tags = []
@@ -40,13 +46,14 @@ class Breeze(BreezeRequests):
                 people_list_with_tags.append(p)
 
             tags_names = []
+            log(f'{cls.LOGGER_ID} get_contacts: updating people tags')
             for tag in tags:
                 people = cls._get_users_by_tag_id(tag['id'])
                 people_list_with_tags = cls._update_people_in_list_with_tag(people, people_list_with_tags, tag['name'])
                 tags_names.append(tag['name'])
 
         except Exception as e:
-            print(e)
+            log(f'{cls.LOGGER_ID} get_contacts: something went wrong: {e}')
             return False, None, None
 
         return True, people_list_with_tags, tags_names

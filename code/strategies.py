@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import os
 
+from datetime import datetime
 from configs import (
     HEADER_VALUE_MAPPINGS,
     DATA_OUTPUT_FILE_NAME,
@@ -16,7 +17,7 @@ from configs import (
 from respondio import RespondIO
 from breeze import Breeze
 from utils import send_email
-
+from logger import log
 
 NUMERIC_OPERATORS = ['<', '<=', '>', '>=', '%']
 
@@ -127,6 +128,7 @@ class CSVHandler:
 
             export_path = f'data_files/output/{cls.export_dir}/{path}'
         dataframe.to_csv(export_path, index=False)
+        return export_path
 
     @classmethod
     def get_header(cls, dataframe):
@@ -326,6 +328,7 @@ class StrategyOne(CSVStrategy):
 
 class StrategyTwo(StrategyOne):
     export = False
+    processed_dataframe = None
     remote_sync_result = {}
 
     @classmethod
@@ -354,15 +357,17 @@ class StrategyTwo(StrategyOne):
 
     @classmethod
     def handle_cleaned_data(cls, dataframe):
+        cls.processed_dataframe = dataframe
+
         if cls.export:
-            super().handle_cleaned_data(dataframe)
+            super().handle_cleaned_data(cls.processed_dataframe)
 
         # Push to api
-        contacts = cls.parse_to_dictionary(dataframe)
+        contacts = cls.parse_to_dictionary(cls.processed_dataframe)
         cls.remote_sync_result = RespondIO.sync_to_respondio(contacts)
 
         if cls.remote_sync_result.get('status') == RespondIO.FAILED and cls.export:
-            cls._export_failed_sync_contacts(dataframe)
+            cls._export_failed_sync_contacts()
 
     @classmethod
     def notify_results(cls, *args, **kwargs):
@@ -403,7 +408,8 @@ class StrategyTwo(StrategyOne):
         print(f"{stats['deletes']} deletions failed")
 
     @classmethod
-    def _export_failed_sync_contacts(cls, dataframe):
+    def _export_failed_sync_contacts(cls):
+        dataframe = cls.processed_dataframe
         # This setting only suppresses an irrelevant warning message
         pd.options.mode.chained_assignment = None
 
@@ -452,7 +458,8 @@ class StrategyTwo(StrategyOne):
         new_dataframe = pd.concat(subframes)
         if len(new_dataframe.index) > 0:
             print('Exporting sync failures...')
-            cls.export_to_csv(new_dataframe, output_path=FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME)
+            output_path = cls.export_to_csv(new_dataframe, output_path=FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME)
+            return output_path
 
 
 class StrategyThree(StrategyTwo):
@@ -460,14 +467,16 @@ class StrategyThree(StrategyTwo):
 
     @classmethod
     def execute(cls, samplefile, datafile, *args, **kwargs):
+        log('Executing Strategy 3')
         success, contacts, tags = Breeze.get_contacts()
 
         if success:
             dataframe = cls.parse_to_dataframe(contacts, tags)
             cls.export_to_csv(dataframe, datafile, generated_input_file=True)
 
-            faulty_data = super().execute(samplefile, datafile, *args, **kwargs)
+            super().execute(samplefile, datafile, *args, **kwargs)
         else:
+            log('Failed to retrieve Breeze contacts. Notifying via email')
             cls.send_email(
                 'Failed sync',
                 'Could not retrieve Breeze contacts'
@@ -475,8 +484,8 @@ class StrategyThree(StrategyTwo):
             return None
 
     @classmethod
-    def report_faulty_data(cls, faulty_data):
-        cls.faulty_data = faulty_data
+    def report_faulty_data(cls, _faulty_data):
+        pass
 
     @classmethod
     def handle_cleaned_data(cls, dataframe):
@@ -484,8 +493,30 @@ class StrategyThree(StrategyTwo):
 
     @classmethod
     def notify_results(cls, *args, **kwargs):
-        # Email faulty data + failed results
-        pass
+        today_date = datetime.strftime(datetime.today(), "%d-%m-%Y %H:%M:%S")
+        attachment = None
+
+        if cls.remote_sync_result.get('status') == RespondIO.FAILED:
+            subject = f'Some items failed to sync - {today_date}'
+            attachment_file_path = cls._get_failed_results_attachment_path()
+            attachment = cls._get_email_attachment(attachment_file_path)
+
+            stats = cls.remote_sync_result['stats']
+
+            email_body = f"""
+            Creates failed: {stats['creates']}
+            Updates failed: {stats['updates']}
+            Deletes failed: {stats['deletes']}
+            
+            See the attached document for the failed results.
+            """
+        else:
+            subject = f'Successful sync - {today_date}'
+            email_body = f"""
+            Your data has been successfully synced! 
+            """
+
+        send_email(subject, email_body, attachment=attachment)
 
     @classmethod
     def parse_to_dataframe(cls, raw_breeze_contacts, tags):
@@ -508,3 +539,12 @@ class StrategyThree(StrategyTwo):
                     dataframe_dict[qualified_header][index] = 'x'
 
         return pd.DataFrame(data=dataframe_dict)
+
+    @classmethod
+    def _get_failed_results_attachment_path(cls):
+        path = cls._export_failed_sync_contacts()
+        return path
+
+    @classmethod
+    def _get_email_attachment(cls, attachment_file_path):
+        return []

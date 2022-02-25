@@ -1,4 +1,6 @@
 
+DEFAULT_EMAIL = 'charlsmit96@gmail.com'
+
 # Default auxiliary settings - can also be changed by the respective script arguments
 DEFAULT_STRATEGY = '1'
 DRY_RUN = 'no'
@@ -140,8 +142,6 @@ RESPONDIO_API_TOKEN = 'f5b39f52ba96fdacf47f0b1fe145cf68c5ffcaf8fe5108cbab7c0e18b
 BREEZE_API_URL = 'https://gesinskerk.breezechms.com/api/'
 BREEZE_API_KEY = 'dd6bdc926910babb9e745163ee11b4d0'
 
-DEFAULT_EMAIL = 'charlsmit96@gmail.com'
-
 BREEZE_TO_CSV_HEADER_CONVERTERS = {
     'id': 'Breeze ID',
     'first_name': 'First Name',
@@ -152,3 +152,5 @@ BREEZE_TO_CSV_HEADER_CONVERTERS = {
     'mobile': 'Mobile',
     'email': 'Email',
 }
+
+LOG_FILE = 'logs'
