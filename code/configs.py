@@ -2,7 +2,7 @@ from secrets import *
 
 EMAIL_RECIPIENTS = [
     'charlsmit96@gmail.com',
-    # 'riaan@gesinskerk.co.za'
+    'riaan@gesinskerk.co.za'
 ]
 DEFAULT_FROM_EMAIL = 'charlsmit96@gmail.com'
 
