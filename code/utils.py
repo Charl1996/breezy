@@ -1,4 +1,5 @@
-from configs import API_FIELD_MAPPINGS
+from configs import API_FIELD_MAPPINGS, DEFAULT_FROM_EMAIL, EMAIL_RECIPIENTS
+from mailer import mail
 
 
 def map_to_respondio_api_fields(breeze_contacts):
@@ -168,3 +169,18 @@ def output_dry_run_results(creates=[], updates=[], deletes=[]):
     _print_deletes(deletes)
     # Exit prematurely, since no additional work is needed
     exit(0)
+
+
+def send_email(subject, body, recipients=[], attachment_info={}):
+    if not recipients:
+        recipients = EMAIL_RECIPIENTS
+    if not subject or body:
+        return None
+
+    mail(
+        from_address=DEFAULT_FROM_EMAIL,
+        recipients=recipients,
+        subject=subject,
+        body=body,
+        attachment_info=attachment_info,
+    )

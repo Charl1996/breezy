@@ -1,4 +1,13 @@
-data_files/
-!data_files/input/sample.csv
+# created by virtualenv automatically
+.idea/
+__pycache__/
 lib/
+pyvenv.cfg
+bin/
+
+#.gitignore
+logs
+
 code/secrets.py
+data_files/
+!data_files/sample.csv

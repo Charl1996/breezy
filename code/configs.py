@@ -1,9 +1,7 @@
-from secrets import (
-    RESPONDIO_API_URL,
-    RESPONDIO_API_TOKEN,
-    BREEZE_API_URL,
-    BREEZE_API_KEY,
-)
+from secrets import *
+
+EMAIL_RECIPIENTS = ['charlsmit96@gmail.com']
+DEFAULT_FROM_EMAIL = 'charlsmit96@gmail.com'
 
 # Default auxiliary settings - can also be changed by the respective script arguments
 DEFAULT_STRATEGY = '1'
@@ -16,6 +14,8 @@ DEFAULT_SAMPLE_INPUT_FILE_PATH = 'data_files/input/sample.csv'
 # Output paths
 DATA_OUTPUT_FILE_NAME = 'contacts_to_sync.csv'
 FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME = 'failed_syncs.csv'
+
+LOG_FILE = 'logs'
 
 """ 
     This config governs the header mappings between the sample file (respond.io) and the data file (breeze),
@@ -140,3 +140,14 @@ API_FIELD_MAPPINGS = {
     },
 }
 
+
+BREEZE_TO_CSV_HEADER_CONVERTERS = {
+    'id': 'Breeze ID',
+    'first_name': 'First Name',
+    'last_name': 'Last Name',
+    'gender': 'Gender',
+    'age': 'Age',
+    'campus': 'Campus',
+    'mobile': 'Mobile',
+    'email': 'Email',
+}

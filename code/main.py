@@ -11,6 +11,7 @@ from configs import (
 STRATEGIES = {
     '1': 'StrategyOne',
     '2': 'StrategyTwo',
+    '3': 'StrategyThree',
 }
 
 
