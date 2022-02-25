@@ -64,21 +64,35 @@ class Breeze(BreezeRequests):
 
     @classmethod
     def _parse_person_fields(cls, person):
-        def _age(birth):
-            if not birth:
+        def _age(birth_date):
+            if not birth_date:
                 return ''
-            return datetime.utcnow().year - int(birth[:4])
+            born = datetime.strptime(f'{birth_date} 00:00:00', '%Y-%m-%d %H:%M:%S')
+            today = datetime.today()
+            return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+        def _mobile(phone_list):
+            for item in phone_list:
+                if item['phone_type'] == 'mobile':
+                    return item['phone_number']
+            return ''
+
+        def _email(email_list):
+            for item in email_list:
+                if item['field_type'] == 'email_primary':
+                    return item['address']
+            return ''
 
         parsed_person = dict()
 
         parsed_person['id'] = person['id']
-        parsed_person['first_name'] = person['first_name']
+        parsed_person['first_name'] = person['force_first_name']
         parsed_person['last_name'] = person['last_name']
         parsed_person['gender'] = person['details'].get('757881885', {}).get('name')
         parsed_person['age'] = _age(person['details'].get('birthdate'))
         parsed_person['campus'] = person['details'].get('1847408178', {}).get('name')
-        parsed_person['mobile'] = person['details'].get('79910291', [{}])[0].get('phone_number')
-        parsed_person['email'] = person['details'].get('1676694648', [{}])[0].get('address')
+        parsed_person['mobile'] = _mobile(person['details'].get('79910291', []))
+        parsed_person['email'] = _email(person['details'].get('1676694648', []))
         parsed_person['tags'] = []
 
         return parsed_person
