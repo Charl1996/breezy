@@ -175,10 +175,8 @@ def output_dry_run_results(creates=[], updates=[], deletes=[]):
 def send_email(subject, body, recipients=[], attachment_info={}):
     if not recipients:
         recipients = EMAIL_RECIPIENTS
-    if not subject or body:
-        return None
 
-    log(f'Sending email: {subject}')
+    log(f'Sending email with subject: {subject}')
     mail(
         from_address=DEFAULT_FROM_EMAIL,
         recipients=recipients,

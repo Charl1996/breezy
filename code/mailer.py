@@ -4,7 +4,6 @@ from logger import log
 
 
 def mail(from_address, recipients=[], subject=None, body=None, attachment_info=None):
-    print('Inside mail')
     data = {
         "from": from_address,
         "to": recipients,

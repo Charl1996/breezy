@@ -517,7 +517,7 @@ class StrategyThree(StrategyTwo):
             """
         else:
             subject = f'Successful sync - {today_date}'
-            email_body = f"""
+            email_body = """
             Your data has been successfully synced! 
             """
 
