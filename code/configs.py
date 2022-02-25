@@ -1,3 +1,9 @@
+from secrets import (
+    RESPONDIO_API_URL,
+    RESPONDIO_API_TOKEN,
+    BREEZE_API_URL,
+    BREEZE_API_KEY,
+)
 
 # Default auxiliary settings - can also be changed by the respective script arguments
 DEFAULT_STRATEGY = '1'
