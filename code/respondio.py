@@ -205,6 +205,13 @@ class RespondIO(RespondIORequests):
         failed_updates = []
         print('Updating contacts...')
         for contact_to_update in updates:
+            if 'phone' in contact_to_update.get('custom_fields', {}).keys() and not contact_to_update['custom_fields']['phone']:
+                failed_updates.append(
+                    cls._failed_response(
+                        contact_to_update, None, message='Invalid phone number!')
+                )
+                contact_to_update['custom_fields'].pop('phone')
+
             contact_id = contact_to_update['id']
 
             if contact_to_update.get('custom_fields'):
