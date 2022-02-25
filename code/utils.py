@@ -1,5 +1,6 @@
 from configs import API_FIELD_MAPPINGS, DEFAULT_FROM_EMAIL, EMAIL_RECIPIENTS
 from mailer import mail
+from logger import log
 
 
 def map_to_respondio_api_fields(breeze_contacts):
@@ -177,6 +178,7 @@ def send_email(subject, body, recipients=[], attachment_info={}):
     if not subject or body:
         return None
 
+    log(f'Sending email: {subject}')
     mail(
         from_address=DEFAULT_FROM_EMAIL,
         recipients=recipients,
