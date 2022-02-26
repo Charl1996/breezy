@@ -1,5 +1,6 @@
 import logging
 from configs import LOG_FILE
+from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -9,4 +10,4 @@ logger.addHandler(handler)
 
 
 def log(message):
-    logger.info(message)
+    logger.info(f'[{datetime.today()}] {message}')
