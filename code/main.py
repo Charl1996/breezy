@@ -6,6 +6,7 @@ from configs import (
     DEFAULT_EXPORT_CSV,
     DRY_RUN,
 )
+from logger import log
 
 # Maps the specified strategy number to file
 STRATEGIES = {
@@ -13,6 +14,8 @@ STRATEGIES = {
     '2': 'StrategyTwo',
     '3': 'StrategyThree',
 }
+
+log('EXECUTING SCRIPT...')
 
 
 def handle_arguments():
