@@ -14,7 +14,7 @@ from configs import (
     FAILED_SYNC_DATAFRAME_OUTPUT_FILE_NAME,
     BREEZE_TO_CSV_HEADER_CONVERTERS,
 )
-from respondio import RespondIO
+from sleekflow import Sleekflow
 from breeze import Breeze
 from utils import send_email
 from logger import log
@@ -333,7 +333,7 @@ class StrategyTwo(StrategyOne):
 
     @classmethod
     def execute(cls, samplefile, datafile, *args, **kwargs):
-        RespondIO.set_dry_run(kwargs['dry_run'])
+        Sleekflow.set_dry_run(kwargs['dry_run'])
 
         cls.export = kwargs.get('export')
         super().execute(samplefile, datafile)
@@ -364,16 +364,16 @@ class StrategyTwo(StrategyOne):
 
         # Push to api
         contacts = cls.parse_to_dictionary(cls.processed_dataframe)
-        cls.remote_sync_result = RespondIO.sync_to_respondio(contacts)
+        cls.remote_sync_result = Sleekflow.sync(contacts)
 
-        if cls.remote_sync_result.get('status') == RespondIO.FAILED and cls.export:
+        if cls.remote_sync_result.get('status') == Sleekflow.FAILED and cls.export:
             cls._export_failed_sync_contacts()
 
     @classmethod
     def notify_results(cls, *args, **kwargs):
         if not cls.export:
             print('\n')
-            if cls.remote_sync_result.get('status') == RespondIO.FAILED:
+            if cls.remote_sync_result.get('status') == Sleekflow.FAILED:
                 failed_syncs = cls.remote_sync_result.get('failed')
 
                 if failed_syncs:
@@ -497,7 +497,7 @@ class StrategyThree(StrategyTwo):
         today_date = datetime.strftime(datetime.today(), "%d-%m-%Y %H:%M:%S")
         attachment_info = None
 
-        if cls.remote_sync_result.get('status') == RespondIO.FAILED:
+        if cls.remote_sync_result.get('status') == Sleekflow.FAILED:
             subject = f'Some items failed to sync - {today_date}'
             attachment_file_path = cls._get_failed_results_attachment_path()
 

@@ -78,6 +78,7 @@ class RespondIO(RespondIORequests):
             respondio_contacts_data = []
 
             log(f'{cls.LOGGER_ID} sync_to_respondio: retrieving contacts')
+
             while True:
                 log(f'{cls.LOGGER_ID} sync_to_respondio: retrieving page data: {current_query_page}')
                 contacts_data, _metadata = cls.get_contacts(current_query_page)
@@ -91,7 +92,7 @@ class RespondIO(RespondIORequests):
                 breeze_contacts=breeze_contacts,
                 respondio_contacts=respondio_contacts_data
             )
-
+            breakpoint()
             if cls.dry_run:
                 output_dry_run_results(creates=creates, updates=updates, deletes=deletes)
 
@@ -170,6 +171,9 @@ class RespondIO(RespondIORequests):
             response = cls.post('contact/', payload)
 
             if response.status_code != 200:
+                # Check is contact already exists
+                # If so, "delete" the contact on respondio so that the next sync will create him/her
+
                 failed_creates.append(cls._failed_response(contact_to_create, response))
                 continue
 

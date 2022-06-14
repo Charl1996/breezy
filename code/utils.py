@@ -184,3 +184,47 @@ def send_email(subject, body, recipients=[], attachment_info={}):
         body=body,
         attachment_info=attachment_info,
     )
+
+
+# Sleekflow
+#
+# {
+#     'Country': 'South Africa',
+#     'PhoneNumber': '27837644967',
+#     'Lists': '',
+#     'ContactOwner': '4251f4b3-7c25-4315-8589-a09b9a33466a',
+#     'Labels': '',
+#     'LastChannel': 'whatsapp360dialog',
+#     'Email': '',
+#     'FirstName': 'Cheré Steyn',
+#     'LastName': '',
+# }
+
+# Breeze
+#
+# {
+#     'First Name': 'Ilze Ivana',
+#     'Last Name': 'Aaron',
+#     'Phone Number': '27780680957',
+#     'Email': 'ilzeaaron1974@gmail.com',
+#     'Tags': 'Belangstellend - Ontdek 101, Doof, Visitor, Durbanville Campus, Female',
+#     'Assignee': None,
+#     'custom_field.breeze_id': 40768456,
+#     'custom_field.active': 'true',
+#     'Age': ''
+# }
+
+# def get_contact_comparisons(db_contacts, sleekflow_contacts):
+#
+#     creates = []
+#     updates = []
+#     deletes = []
+#
+#     for contact in db_contacts:
+#         not_found = False
+#         # if contact cannot be found in sleekflow_contacts, not_found = True
+#
+#         if not_found:
+#             deletes.append(contact)
+#
+#     return creates, updates, deletes

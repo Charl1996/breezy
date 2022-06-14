@@ -1,7 +1,7 @@
 from secrets import *
 
 # Default auxiliary settings - can also be changed by the respective script arguments
-DEFAULT_STRATEGY = '1'
+DEFAULT_STRATEGY = '3'
 DRY_RUN = 'no'
 DEFAULT_EXPORT_CSV = 'yes'  # Not relevant to strategy 1
 
