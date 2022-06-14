@@ -89,7 +89,7 @@ class Sleekflow(SleekflowRequests):
 
     @classmethod
     def sync(cls, breeze_contacts: []):
-        print('Syncing...')
+        log(f'{cls.LOGGER_ID} Syncing...')
 
         # sleekflow_contacts = cls.get_all_contacts()
 
@@ -154,7 +154,7 @@ class Sleekflow(SleekflowRequests):
         # Add birth date
         # Add age
 
-        print('Handling labels...')
+        log(f'{cls.LOGGER_ID} create_contacts: handling labels...')
         # Get all labels
         res = cls.get(cls.add_api_key('labels'))
 
@@ -163,7 +163,7 @@ class Sleekflow(SleekflowRequests):
         # Delete all labels
         res = cls.delete(cls.add_api_key('labels'), data=data)
 
-        print('Parsing contacts...')
+        log(f'{cls.LOGGER_ID} create_contacts: parse contacts...')
         data = []
 
         for contact in contacts:
@@ -178,12 +178,12 @@ class Sleekflow(SleekflowRequests):
                 }
                 data.append(new_contact)
 
-        print('Making the request...')
+        log(f'{cls.LOGGER_ID} create_contacts: making long running request...')
         endpoint = cls.add_api_key('Contact/AddOrUpdate')
         res = cls.post(endpoint, data)
 
-        print(res.status_code)
-
+        log(f'{cls.LOGGER_ID} create_contacts result: status code => {res.status_code}')
+        log(f'{cls.LOGGER_ID} create_contacts result: content => {json.loads(res.content)}')
 
     @classmethod
     def update_contacts(cls, contacts):
