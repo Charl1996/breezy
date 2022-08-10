@@ -173,7 +173,7 @@ class Sleekflow(SleekflowRequests):
                     'lastName': contact['Last Name'],
                     'addLabels': contact['Tags'].split(', '),
                     'labels': contact['Tags'].split(', '),
-                    'email': contact.get('Email'),
+                    # 'email': contact.get('Email'),
                     'phoneNumber': contact.get('Phone Number'),
                 }
                 data.append(new_contact)
