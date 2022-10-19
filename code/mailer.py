@@ -11,7 +11,8 @@ def mail(from_address, recipients=[], subject=None, body=None, attachment_info=N
         "text": body,
     }
     files = None
-    if attachment_info is not None:
+
+    if attachment_info:
         files = [("attachment", (attachment_info['name'], open(attachment_info['path'], 'rb').read(), 'text/csv'))]
 
     res = requests.post(
