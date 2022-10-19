@@ -180,10 +180,28 @@ class Sleekflow(SleekflowRequests):
 
         log(f'{cls.LOGGER_ID} create_contacts: making long running request...')
         endpoint = cls.add_api_key('Contact/AddOrUpdate')
-        res = cls.post(endpoint, data)
 
-        log(f'{cls.LOGGER_ID} create_contacts result: status code => {res.status_code}')
-        log(f'{cls.LOGGER_ID} create_contacts result: content => {json.loads(res.content)}')
+        chunk_size = 200
+        max_lenght = len(data)
+
+        if chunk_size > max_lenght:
+            chunk_size = max_lenght
+
+        iterations = int(max_lenght / chunk_size)
+
+        starting_index = 0
+        for iteration in range(1, iterations + 2):
+            if chunk_size*iteration < max_lenght:
+                items_to_send = data[starting_index:chunk_size*iteration]
+            else:
+                items_to_send = data[starting_index:]
+
+            res = cls.post(endpoint, items_to_send)
+
+            log(f'{cls.LOGGER_ID} create_contacts result: status code => {res.status_code}')
+            if res.status_code != 200 or res.status_code != "200":
+                log(f'{cls.LOGGER_ID} create_contacts result: content => {json.loads(res.content)}')
+            starting_index = chunk_size*iteration
 
     @classmethod
     def update_contacts(cls, contacts):

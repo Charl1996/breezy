@@ -117,7 +117,7 @@ class Breeze(BreezeRequests):
         return json.loads(result.content)
 
     @classmethod
-    def _get_people(cls, detail=False):
+    def _get_people(cls, detail=False, attempt=1):
         detail_flag = 0
         if detail:
             detail_flag = 1
@@ -126,7 +126,13 @@ class Breeze(BreezeRequests):
         if result.status_code != 200:
             raise Exception('Retrieving tags unsuccessful!')
 
-        return json.loads(result.content)
+        if result.content:
+            return json.loads(result.content)
+        else:
+            if attempt < 2:
+                return cls._get_people(detail=detail, attempt=2)
+            else:
+                return []
 
     @classmethod
     def _get_users_by_tag_id(cls, tag_id):
