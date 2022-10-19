@@ -477,7 +477,7 @@ class StrategyThree(StrategyTwo):
             super().execute(samplefile, datafile, *args, **kwargs)
         else:
             log('Failed to retrieve Breeze contacts. Notifying via email')
-            cls.send_email(
+            send_email(
                 'Failed sync',
                 'Could not retrieve Breeze contacts'
             )
