@@ -92,7 +92,7 @@ class RespondIO(RespondIORequests):
                 breeze_contacts=breeze_contacts,
                 respondio_contacts=respondio_contacts_data
             )
-            breakpoint()
+
             if cls.dry_run:
                 output_dry_run_results(creates=creates, updates=updates, deletes=deletes)
 

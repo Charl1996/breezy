@@ -36,25 +36,29 @@ class Breeze(BreezeRequests):
         try:
             log(f'{cls.LOGGER_ID} get_contacts: retrieving tags')
             tags = cls._get_tags()
+        except Exception as e:
+            log(f'{cls.LOGGER_ID} get_contacts: something went wrong retrieving tags: {e}')
+            return False, None, None
 
+        try:
             log(f'{cls.LOGGER_ID} get_contacts: retrieving people')
             people_list = cls._get_people(detail=True)
-
-            people_list_with_tags = []
-            for person in people_list:
-                p = cls._parse_person_fields(person)
-                people_list_with_tags.append(p)
-
-            tags_names = []
-            log(f'{cls.LOGGER_ID} get_contacts: updating people tags')
-            for tag in tags:
-                people = cls._get_users_by_tag_id(tag['id'])
-                people_list_with_tags = cls._update_people_in_list_with_tag(people, people_list_with_tags, tag['name'])
-                tags_names.append(tag['name'])
-
         except Exception as e:
-            log(f'{cls.LOGGER_ID} get_contacts: something went wrong: {e}')
+            log(f'{cls.LOGGER_ID} get_contacts: something went wrong retrieving people: {e}')
             return False, None, None
+
+        people_list_with_tags = []
+        for person in people_list:
+            p = cls._parse_person_fields(person)
+            people_list_with_tags.append(p)
+
+        tags_names = []
+        log(f'{cls.LOGGER_ID} get_contacts: updating people tags')
+
+        for tag in tags:
+            people = cls._get_users_by_tag_id(tag['id'])
+            people_list_with_tags = cls._update_people_in_list_with_tag(people, people_list_with_tags, tag['name'])
+            tags_names.append(tag['name'])
 
         return True, people_list_with_tags, tags_names
 
@@ -126,9 +130,15 @@ class Breeze(BreezeRequests):
 
     @classmethod
     def _get_users_by_tag_id(cls, tag_id):
+        if not tag_id:
+            raise Exception(f"Invalid value for tag_id: {tag_id}")
+
         filter_json = json.dumps({'tag_contains': f'y_{tag_id}'})
         result = cls.get(f'people/?filter_json={filter_json}')
         if result.status_code != 200:
             raise Exception('Retrieving tags unsuccessful!')
 
-        return json.loads(result.content)
+        if result.content:
+            return json.loads(result.content)
+        else:
+            return []
