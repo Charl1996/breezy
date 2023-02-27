@@ -92,7 +92,6 @@ class Sleekflow(SleekflowRequests):
         log(f'{cls.LOGGER_ID} Syncing...')
 
         # sleekflow_contacts = cls.get_all_contacts()
-
         cls.create_contacts(breeze_contacts)
 
         # creates, updates, deletes = compare_contacts(
@@ -156,11 +155,13 @@ class Sleekflow(SleekflowRequests):
 
         log(f'{cls.LOGGER_ID} create_contacts: handling labels...')
         # Get all labels
+
         res = cls.get(cls.add_api_key('labels'))
 
         labels = json.loads(res.content)
         data = [{'id': label['id'] for label in labels}]
         # Delete all labels
+
         res = cls.delete(cls.add_api_key('labels'), data=data)
 
         log(f'{cls.LOGGER_ID} create_contacts: parse contacts...')
@@ -181,7 +182,7 @@ class Sleekflow(SleekflowRequests):
         log(f'{cls.LOGGER_ID} create_contacts: making long running request...')
         endpoint = cls.add_api_key('Contact/AddOrUpdate')
 
-        manual = True
+        manual = False
 
         if manual:
             res_messages = []

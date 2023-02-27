@@ -78,9 +78,13 @@ class Breeze(BreezeRequests):
         def _age(birth_date):
             if not birth_date:
                 return ''
-            born = datetime.strptime(f'{birth_date} 00:00:00', '%Y-%m-%d %H:%M:%S')
-            today = datetime.today()
-            return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+            try:
+                born = datetime.strptime(f'{birth_date} 00:00:00', '%Y-%m-%d %H:%M:%S')
+                today = datetime.today()
+                return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+            except ValueError as e:
+                print(f"Error inside _age: {e}")
+                return ''
 
         def _mobile(phone_list):
             for item in phone_list:

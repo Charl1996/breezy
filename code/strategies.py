@@ -473,7 +473,6 @@ class StrategyThree(StrategyTwo):
         if success:
             dataframe = cls.parse_to_dataframe(contacts, tags)
             cls.export_to_csv(dataframe, datafile, generated_input_file=True)
-
             super().execute(samplefile, datafile, *args, **kwargs)
         else:
             log('Failed to retrieve Breeze contacts. Notifying via email')
